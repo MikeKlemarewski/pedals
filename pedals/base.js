@@ -1,15 +1,12 @@
 const height = 200;
 const width = 100;
 
-class Pedal {
+export default class BasePedal {
   constructor({
     x,
     y,
     color = `#${Math.floor(Math.random()*16777215).toString(16)}`,
     audioCtx,
-    pedalFunction,
-    isInput = false,
-    isOutput = false,
   }) {
     this.x = x;
     this.y = y;
@@ -18,65 +15,17 @@ class Pedal {
     this.inputCord = null;
     this.outputCord = null;
 
-    this.isInput = isInput;
-    this.isOutput = isOutput;
-
     this.audioNode = null;
-    this.pedalFunction = null;
-    if (this.isInput) {
-      this.pedalFunction = 'input';
-    } else if (this.isOutput) {
-      this.pedalFunction = 'output';
-    } else {
-      this.pedalFunction = pedalFunction;
-    }
+
     this.setupAudioNode(audioCtx);
   }
 
-  setupAudioNode(audioCtx) {
-    if (this.pedalFunction === 'input') {
-      const oscillator = audioCtx.createOscillator();
-
-      oscillator.type = 'sine';
-      oscillator.frequency.setValueAtTime(350, audioCtx.currentTime); // value in hertz
-      oscillator.start();
-  
-      this.audioNode = oscillator;
-    } else if (this.pedalFunction === 'output') {
-      this.audioNode = audioCtx.destination;
-    } else if (this.pedalFunction === 'volume') {
-      const gainNode = audioCtx.createGain();
-      gainNode.gain.setValueAtTime(2, audioCtx.currentTime);
-
-      this.audioNode = gainNode;
-    } else if (this.pedalFunction === 'distortion') {
-      const distortion = audioCtx.createWaveShaper();
-
-      function makeDistortionCurve(amount) {
-        var k = typeof amount === 'number' ? amount : 50,
-          n_samples = 44100,
-          curve = new Float32Array(n_samples),
-          deg = Math.PI / 180,
-          i = 0,
-          x;
-        for ( ; i < n_samples; ++i ) {
-          x = i * 2 / n_samples - 1;
-          curve[i] = ( 3 + k ) * x * 20 * deg / ( Math.PI + k * Math.abs(x) );
-        }
-        return curve;
-      };
-
-      distortion.curve = makeDistortionCurve(400);
-      this.audioNode = distortion;
-    }
+  setupAudioNode() {
+    throw Error('Pleeze implement setupAudioNode 🙏')
   }
 
   getAudioNode() {
     return this.audioNode;
-  }
-
-  getPedalFunction() {
-    return this.pedalFunction;
   }
 
   getLeftEdgeX() {
@@ -120,20 +69,12 @@ class Pedal {
     if (x < this.x || x > (this.x + width)) {
       return false;
     }
-  
+
     if (y < this.y || y > (this.y + height)) {
       return false;
     }
-  
+
     return true;
-  }
-
-  isInputPedal() {
-    return this.isInput;
-  }
-
-  isOutputPedal() {
-    return this.isOutput;
   }
 
   plugInInputCord(cord) {
@@ -182,5 +123,3 @@ class Pedal {
     ctx.fillStyle = previousFillStyle;
   }
 }
-
-export default Pedal;

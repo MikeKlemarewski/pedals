@@ -1,5 +1,8 @@
 import PatchCord from './patchCord.js';
-import Pedal from './pedal.js';
+import InputPedal from './pedals/input.js';
+import DistortionPedal from './pedals/distortion.js';
+import OutputPedal from './pedals/output.js';
+import VolumePedal from './pedals/volume.js';
 
 const AudioContext = window.AudioContext || window.webkitAudioContext;
 const audioCtx = new AudioContext();
@@ -21,10 +24,10 @@ const cords = [
 ]
 
 const pedals = [
-  new Pedal({ x: 50, y: 50, color: '#000', isInput: true, audioCtx }),
-  new Pedal({ x: 350, y: 50, pedalFunction: 'distortion', audioCtx }),
-  new Pedal({ x: 650, y: 50, pedalFunction: 'volume', audioCtx }),
-  new Pedal({ x: 950, y: 50, color: '#000', isOutput: true, audioCtx }),
+  new InputPedal({ x: 50, y: 50, color: '#000', audioCtx }),
+  new DistortionPedal({ x: 350, y: 50, color: 'salmon', audioCtx }),
+  new VolumePedal({ x: 650, y: 50, color: 'green', audioCtx }),
+  new OutputPedal({ x: 950, y: 50, color: '#000', audioCtx }),
 ];
 
 function drawScene() {
@@ -75,7 +78,6 @@ function plugPatchCableIntoNearestPedal(patchCord) {
     }
 
     drawScene();
-    traversePedals();
   }
 }
 
@@ -112,20 +114,8 @@ function getPedalToPlugInto(x, y, cordSide) {
     const pedalBottomEdge = pedal.getBottomEdgeY();
     const isVerticallyWithinPedal = (y > pedalTopEdge) && (y < pedalBottomEdge);
 
-    if (!isVerticallyWithinPedal) {
-      return false;
-    }
-
-    return true;
+    return isVerticallyWithinPedal;
   });
-}
-
-function traversePedals() {
-  let pedal = pedals.find(pedal => pedal.isInputPedal());
-
-  while (!!pedal) {
-    pedal = pedal.getNextPedal();
-  }
 }
 
 canvas.addEventListener('mousedown', onMouseDown);
